@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from __future__ import print_function
 import pickle
 import os.path
@@ -8,10 +10,8 @@ from google.auth.transport.requests import Request
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
 
-def main():
-    """Shows basic usage of the Gmail API.
-    Lists the user's Gmail labels.
-    """
+def authenticate(SCOPES):
+    """Lists the user's Gmail labels."""
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -32,17 +32,24 @@ def main():
             pickle.dump(creds, token)
 
     service = build('gmail', 'v1', credentials=creds)
+    
+    return service
 
+def get_labels(service):
     # Call the Gmail API
     results = service.users().labels().list(userId='me').execute()
     labels = results.get('labels', [])
 
     if not labels:
-        print('No labels found.')
+        raise LookupError('No labels found.')
     else:
         print('Labels:')
         for label in labels:
             print(label['name'])
 
+def example():
+    service = authenticate(SCOPES)
+    get_labels(service)   
+
 if __name__ == '__main__':
-    main()
+    example()
